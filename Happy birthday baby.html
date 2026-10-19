@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Make a wish.</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+      :root {
+        --choco-deepest: #1a0d08;
+        --choco-deep: #2a160d;
+        --choco-rich: #3d2014;
+        --choco: #4a2a18;
+        --choco-mid: #5c3520;
+        --ganache: #2e1709;
+        --ganache-light: #4b2a16;
+        --cream: #f4e4c1;
+        --cream-warm: #e8d2a8;
+        --berry-red: #b03a3a;
+        --berry-red-light: #d4565a;
+        --berry-dark: #6e1f22;
+        --blueberry: #3a4b7a;
+        --blueberry-light: #5566a0;
+        --blueberry-dark: #1f2a4a;
+        --flame-core: #fff7d6;
+        --flame-mid: #ffcf6b;
+        --flame-edge: #ff8a2a;
+        --candle-wax: #f3e2c0;
+        --candle-wax-shadow: #c9b486;
+        --gold: #d9b06a;
+      }
+
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        padding: 0;
+        background: var(--choco-deepest);
+        color: var(--cream);
+        font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+        overflow-x: hidden;
+      }
+
+      .font-display { font-family: 'Playfair Display', Georgia, serif; }
+
+      .bg-layer {
+        position: absolute;
+        inset: 0;
+        transition: opacity 1.8s ease;
+        pointer-events: none;
+        z-index: 0;
+      }
+      .bg-light {
+        background:
+          radial-gradient(ellipse 65% 50% at 50% 40%, rgba(255, 248, 228, 0.95) 0%, rgba(232, 216, 184, 0.55) 48%, rgba(217, 196, 160, 0) 75%),
+          linear-gradient(180deg, #f3e9d6 0%, #ece0c8 45%, #e0d2b6 100%);
+        opacity: 1;
+      }
+      .bg-dark {
+        background:
+          radial-gradient(ellipse 70% 55% at 50% 42%, rgba(217, 176, 106, 0.12) 0%, rgba(120, 72, 36, 0.06) 38%, rgba(26, 13, 8, 0) 70%),
+          radial-gradient(ellipse 90% 80% at 50% 120%, rgba(74, 42, 24, 0.55) 0%, rgba(26, 13, 8, 0) 60%),
+          linear-gradient(180deg, #160b06 0%, #1a0d08 45%, #120804 100%);
+        opacity: 0;
+      }
+      .atmos-dim .bg-light { opacity: 0; }
+      .atmos-dim .bg-dark { opacity: 1; }
+
+      .txt-adapt { color: #4a2a18; transition: color 1.6s ease; }
+      .atmos-dim .txt-adapt { color: #f4e4c1; }
+      .txt-adapt-wish { color: #b04145; transition: color 1.6s ease; }
+      .atmos-dim .txt-adapt-wish { color: #c95a5e; }
+      .txt-adapt-gold { color: #a8854a; transition: color 1.6s ease; }
+      .atmos-dim .txt-adapt-gold { color: #d9b06a; }
+      .txt-adapt-warm { color: #6b4a28; transition: color 1.6s ease; }
+      .atmos-dim .txt-adapt-warm { color: #e8d2a8; }
+
+      @keyframes flicker {
+        0%, 100% { transform: scaleY(1) scaleX(1); opacity: 1; }
+        25% { transform: scaleY(1.04) scaleX(0.98); opacity: 0.96; }
+        50% { transform: scaleY(0.98) scaleX(1.02); opacity: 1; }
+        75% { transform: scaleY(1.03) scaleX(0.99); opacity: 0.98; }
+      }
+      .flame {
+        transform-origin: center bottom;
+        transform-box: fill-box;
+        animation: flicker 2.4s ease-in-out infinite;
+        filter: drop-shadow(0 0 6px rgba(255, 160, 60, 0.85)) drop-shadow(0 0 18px rgba(255, 120, 40, 0.45));
+      }
+      @keyframes glow-pulse {
+        0%, 100% { opacity: 0.85; }
+        50% { opacity: 1; }
+      }
+      .flame-halo { animation: glow-pulse 3.2s ease-in-out infinite; }
+
+      @keyframes smokeRise {
+        0% { transform: translateY(0) scaleX(1); opacity: 0; }
+        15% { opacity: 0.55; }
+        100% { transform: translateY(-90px) scaleX(2.6); opacity: 0; }
+      }
+      .smoke {
+        transform-origin: center bottom;
+        animation: smokeRise 2.4s ease-out forwards;
+      }
+
+      @keyframes riseIn {
+        from { opacity: 0; transform: translateY(24px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      .rise-in { animation: riseIn 1.2s cubic-bezier(0.22, 1, 0.36, 1) both; }
+      .rise-in.delay-1 { animation-delay: 0.15s; }
+      .rise-in.delay-2 { animation-delay: 0.4s; }
+      .rise-in.delay-3 { animation-delay: 0.7s; }
+      .rise-in.delay-4 { animation-delay: 1s; }
+
+      @keyframes floatMote {
+        0%   { transform: translateY(0) translateX(0); opacity: 0; }
+        10%  { opacity: 0.7; }
+        90%  { opacity: 0.5; }
+        100% { transform: translateY(-120px) translateX(12px); opacity: 0; }
+      }
+      .mote {
+        position: absolute;
+        width: 3px;
+        height: 3px;
+        border-radius: 9999px;
+        background: rgba(168, 133, 74, 0.7);
+        box-shadow: 0 0 6px rgba(168, 133, 74, 0.5);
+        animation: floatMote 9s linear infinite;
+        transition: background 1.6s ease, box-shadow 1.6s ease;
+      }
+      .atmos-dim .mote {
+        background: rgba(217, 176, 106, 0.8);
+        box-shadow: 0 0 6px rgba(217, 176, 106, 0.6);
+      }
+
+      .btn {
+        font-family: 'DM Sans', sans-serif;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        font-weight: 500;
+        padding: 0.85rem 1.6rem;
+        border-radius: 9999px;
+        transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        cursor: pointer;
+        border: 1px solid transparent;
+      }
+      .btn-primary {
+        background: linear-gradient(180deg, #d9b06a 0%, #b8893f 100%);
+        color: #2a160d;
+        box-shadow: 0 6px 22px -8px rgba(217, 176, 106, 0.7), inset 0 1px 0 rgba(255, 240, 210, 0.5);
+      }
+      .btn-primary:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 28px -8px rgba(217, 176, 106, 0.85), inset 0 1px 0 rgba(255, 240, 210, 0.6);
+      }
+      .btn-ghost {
+        background: rgba(74, 42, 24, 0.06);
+        color: #4a2a18;
+        border-color: rgba(74, 42, 24, 0.3);
+      }
+      .atmos-dim .btn-ghost {
+        background: rgba(244, 228, 193, 0.04);
+        color: var(--cream);
+        border-color: rgba(244, 228, 193, 0.25);
+      }
+      .btn-ghost:hover:not(:disabled) {
+        border-color: rgba(74, 42, 24, 0.55);
+        background: rgba(74, 42, 24, 0.1);
+        transform: translateY(-2px);
+      }
+      .atmos-dim .btn-ghost:hover:not(:disabled) {
+        border-color: rgba(244, 228, 193, 0.55);
+        background: rgba(244, 228, 193, 0.08);
+      }
+      .btn:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+        filter: saturate(0.6);
+        transform: none;
+      }
+    </style>
+    <!-- Tailwind CSS Play CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+      const { useEffect, useMemo, useRef, useState } = React;
+      const CANDLE_COUNT = 1;
+
+      function usePrefersReducedMotion() {
+        const [reduced, setReduced] = useState(false);
+        useEffect(() => {
+          const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+          const onChange = () => setReduced(mq.matches);
+          onChange();
+          mq.addEventListener('change', onChange);
+          return () => mq.removeEventListener('change', onChange);
+        }, []);
+        return reduced;
+      }
+
+      function Motes({ count = 14 }) {
+        const motes = useMemo(
+          () =>
+            Array.from({ length: count }).map((_, i) => ({
+              id: i,
+              left: Math.random() * 100,
+              top: 40 + Math.random() * 50,
+              delay: Math.random() * 9,
+              duration: 7 + Math.random() * 6,
+              scale: 0.5 + Math.random() * 0.9,
+            })),
+          [count]
+        );
+        return (
+          <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+            {motes.map((m) => (
+              <span
+                key={m.id}
+                className="mote"
+                style={{
+                  left: `${m.left}%`,
+                  top: `${m.top}%`,
+                  animationDelay: `${m.delay}s`,
+                  animationDuration: `${m.duration}s`,
+                  transform: `scale(${m.scale})`,
+                }}
+              />
+            ))}
+          </div>
+        );
+      }
+
+      function Cake({ litCount }) {
+        return (
+          <div className="relative" style={{ width: 'min(86vw, 420px)', aspectRatio: '1 / 0.82' }}>
+            <svg
+              viewBox="0 0 500 420"
+              width="100%"
+              height="100%"
+              aria-label="Chocolate birthday cake"
+              role="img"
+              style={{ overflow: 'visible' }}
+            >
+              <defs>
+                <linearGradient id="plate" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#e9dcc2" />
+                  <stop offset="50%" stopColor="#c9b896" />
+                  <stop offset="100%" stopColor="#8a7858" />
+                </linearGradient>
+                <radialGradient id="plateTop" cx="50%" cy="40%" r="60%">
+                  <stop offset="0%" stopColor="#f3ead4" />
+                  <stop offset="60%" stopColor="#d4c3a0" />
+                  <stop offset="100%" stopColor="#a89572" />
+                </radialGradient>
+                <linearGradient id="cakeSide" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#5c3520" />
+                  <stop offset="50%" stopColor="#4a2a18" />
+                  <stop offset="100%" stopColor="#2e1709" />
+                </linearGradient>
+                <linearGradient id="cakeLayer2" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#6b3f28" />
+                  <stop offset="100%" stopColor="#3d2014" />
+                </linearGradient>
+                <radialGradient id="ganacheTop" cx="50%" cy="45%" r="60%">
+                  <stop offset="0%" stopColor="#5a341c" />
+                  <stop offset="55%" stopColor="#3d2014" />
+                  <stop offset="100%" stopColor="#25120a" />
+                </radialGradient>
+                <linearGradient id="drip" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3d2014" />
+                  <stop offset="100%" stopColor="#1e0f06" />
+                </linearGradient>
+                <linearGradient id="cream" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#fffaf0" />
+                  <stop offset="60%" stopColor="#f5ebc8" />
+                  <stop offset="100%" stopColor="#d8c49c" />
+                </linearGradient>
+                <radialGradient id="strawberry" cx="35%" cy="30%" r="70%">
+                  <stop offset="0%" stopColor="#e06569" />
+                  <stop offset="55%" stopColor="#b03a3a" />
+                  <stop offset="100%" stopColor="#6e1f22" />
+                </radialGradient>
+                <radialGradient id="strawberryHi" cx="30%" cy="25%" r="30%">
+                  <stop offset="0%" stopColor="#ffd6d0" stopOpacity="0.85" />
+                  <stop offset="100%" stopColor="#ffd6d0" stopOpacity="0" />
+                </radialGradient>
+                <radialGradient id="raspberry" cx="35%" cy="30%" r="70%">
+                  <stop offset="0%" stopColor="#d94158" />
+                  <stop offset="50%" stopColor="#9e1b32" />
+                  <stop offset="100%" stopColor="#590d1b" />
+                </radialGradient>
+                <radialGradient id="blueberry" cx="35%" cy="30%" r="70%">
+                  <stop offset="0%" stopColor="#6678b0" />
+                  <stop offset="60%" stopColor="#3a4b7a" />
+                  <stop offset="100%" stopColor="#1f2a4a" />
+                </radialGradient>
+                <radialGradient id="blueberryHi" cx="30%" cy="25%" r="25%">
+                  <stop offset="0%" stopColor="#cfd8ff" stopOpacity="0.9" />
+                  <stop offset="100%" stopColor="#cfd8ff" stopOpacity="0" />
+                </radialGradient>
+                <linearGradient id="candleWax" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="#c9b486" />
+                  <stop offset="40%" stopColor="#f3e2c0" />
+                  <stop offset="60%" stopColor="#fff5d8" />
+                  <stop offset="100%" stopColor="#a8946a" />
+                </linearGradient>
+                <radialGradient id="flameCore" cx="50%" cy="60%" r="50%">
+                  <stop offset="0%" stopColor="#fff7d6" />
+                  <stop offset="50%" stopColor="#ffcf6b" />
+                  <stop offset="100%" stopColor="#ff8a2a" />
+                </radialGradient>
+                <radialGradient id="flameHalo" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#ffcf6b" stopOpacity="0.55" />
+                  <stop offset="60%" stopColor="#ff8a2a" stopOpacity="0.18" />
+                  <stop offset="100%" stopColor="#ff8a2a" stopOpacity="0" />
+                </radialGradient>
+                <radialGradient id="roomGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stopColor="#ffcf6b" stopOpacity="0.22" />
+                  <stop offset="100%" stopColor="#ff8a2a" stopOpacity="0" />
+                </radialGradient>
+              </defs>
+
+              <circle
+                cx="250"
+                cy="210"
+                r="200"
+                fill="url(#roomGlow)"
+                opacity={litCount / CANDLE_COUNT}
+                style={{ transition: 'opacity 1.4s ease' }}
+              />
+
+              <ellipse cx="250" cy="382" rx="200" ry="22" fill="rgba(0,0,0,0.55)" filter="blur(8px)" />
+
+              <ellipse cx="250" cy="372" rx="195" ry="26" fill="#7a6a4a" />
+              <ellipse cx="250" cy="368" rx="190" ry="24" fill="url(#plate)" />
+              <ellipse cx="250" cy="362" rx="178" ry="20" fill="url(#plateTop)" />
+              <ellipse cx="210" cy="358" rx="60" ry="5" fill="#fff" opacity="0.18" />
+
+              <path
+                d="M 90 360 L 90 295 Q 90 270 250 270 Q 410 270 410 295 L 410 360 Q 410 382 250 382 Q 90 382 90 360 Z"
+                fill="url(#cakeSide)"
+              />
+              <g opacity="0.35">
+                {Array.from({ length: 26 }).map((_, i) => {
+                  const x = 100 + i * 15 + (i % 2) * 6;
+                  const y = 300 + ((i * 7) % 55);
+                  return <circle key={`c${i}`} cx={x} cy={y} r={1 + (i % 3) * 0.4} fill="#2a160d" />;
+                })}
+              </g>
+
+              <ellipse cx="250" cy="295" rx="160" ry="26" fill="#6b3f28" />
+              <ellipse cx="250" cy="293" rx="160" ry="22" fill="#5c3520" />
+
+              <path
+                d="M 95 292 Q 110 318 120 300 Q 132 326 144 302 Q 158 330 172 304 Q 186 332 200 306 Q 216 334 232 308 Q 248 336 266 308 Q 284 336 302 308 Q 318 334 334 306 Q 350 332 366 304 Q 382 330 396 302 Q 408 322 405 295 Q 250 270 95 292 Z"
+                fill="url(#drip)"
+              />
+              <path d="M 100 294 Q 250 274 400 296 L 400 300 Q 250 278 100 298 Z" fill="#6b3f28" opacity="0.5" />
+
+              <ellipse cx="250" cy="288" rx="150" ry="20" fill="url(#cream)" />
+              <ellipse cx="250" cy="286" rx="150" ry="16" fill="#fffaf0" />
+
+              <path
+                d="M 130 288 L 130 235 Q 130 215 250 215 Q 370 215 370 235 L 370 288 Q 370 305 250 305 Q 130 305 130 288 Z"
+                fill="url(#cakeLayer2)"
+              />
+              <g opacity="0.4">
+                {Array.from({ length: 20 }).map((_, i) => {
+                  const x = 140 + i * 12 + (i % 2) * 5;
+                  const y = 240 + ((i * 9) % 45);
+                  return <circle key={`u${i}`} cx={x} cy={y} r={0.9 + (i % 3) * 0.3} fill="#2a160d" />;
+                })}
+              </g>
+
+              <ellipse cx="250" cy="232" rx="120" ry="20" fill="url(#ganacheTop)" />
+              <ellipse cx="215" cy="226" rx="55" ry="6" fill="#fff" opacity="0.12" />
+              <ellipse cx="280" cy="234" rx="30" ry="3" fill="#fff" opacity="0.08" />
+
+              <path
+                d="M 132 230 Q 144 252 154 234 Q 166 256 178 236 Q 190 258 202 238 Q 216 260 230 240 Q 244 262 258 240 Q 272 262 286 240 Q 300 260 314 238 Q 328 258 342 236 Q 356 256 368 234 Q 372 220 370 232 Q 250 210 132 230 Z"
+                fill="url(#drip)"
+              />
+
+              {Array.from({ length: 12 }).map((_, i) => {
+                const angle = (i / 12) * Math.PI * 2;
+                const cx = 250 + Math.cos(angle) * 114;
+                const cy = 230 + Math.sin(angle) * 17.5;
+                return (
+                  <g key={`natural-cream-${i}`}>
+                    <ellipse cx={cx} cy={cy + 2} rx="7" ry="3" fill="rgba(20,10,5,0.3)" />
+                    <path
+                      d={`M ${cx - 7} ${cy} Q ${cx - 4} ${cy - 8} ${cx} ${cy - 7} Q ${cx + 5} ${cy - 8} ${cx + 7} ${cy} Q ${cx + 8} ${cy + 5} ${cx} ${cy + 6} Q ${cx - 8} ${cy + 5} ${cx - 7} ${cy} Z`}
+                      fill="url(#cream)"
+                    />
+                    <circle cx={cx - 1.5} cy={cy - 2.5} r="2.2" fill="#ffffff" opacity="0.85" />
+                  </g>
+                );
+              })}
+
+              <g transform="translate(182 224)">
+                <ellipse cx="0" cy="9" rx="10" ry="3" fill="rgba(0,0,0,0.45)" />
+                <path d="M -8 -4 Q -11 4 -6 12 Q 0 16 6 12 Q 11 4 8 -4 Q 4 -8 0 -8 Q -4 -8 -8 -4 Z" fill="url(#raspberry)" />
+                {[-4, 0, 4].map((hx, idx) => (
+                  <circle key={idx} cx={hx} cy={idx * 3 - 2} r="2.2" fill="#ff708a" opacity="0.75" />
+                ))}
+                <path d="M -5 -6 L 0 -9 L 5 -6" fill="#4f8044" />
+              </g>
+
+              <g transform="translate(318 226)">
+                <ellipse cx="0" cy="9" rx="9" ry="2.5" fill="rgba(0,0,0,0.45)" />
+                <path d="M -7 -4 Q -10 3 -5 11 Q 0 14 5 11 Q 10 3 7 -4 Q 3 -7 0 -7 Q -3 -7 -7 -4 Z" fill="url(#raspberry)" />
+                {[-3, 1].map((hx, idx) => (
+                  <circle key={idx} cx={hx} cy={idx * 3 - 1} r="2" fill="#ff708a" opacity="0.75" />
+                ))}
+              </g>
+
+              <g transform="translate(208 214)">
+                <ellipse cx="0" cy="10" rx="13" ry="3.5" fill="rgba(0,0,0,0.4)" />
+                <path d="M -12 -2 Q -13 11 -7 18 Q 0 24 7 18 Q 13 11 12 -2 Q 7 -7 0 -7 Q -7 -7 -12 -2 Z" fill="url(#strawberry)" />
+                <path d="M -12 -2 Q -13 11 -7 18 Q 0 24 7 18 Q 13 11 12 -2 Q 7 -7 0 -7 Q -7 -7 -12 -2 Z" fill="url(#strawberryHi)" />
+                {[-5, 0, 5, -3, 3].map((sx, i) => (
+                  <ellipse key={i} cx={sx} cy={2 + i * 3} rx="0.7" ry="1.2" fill="#ffe9b0" opacity="0.9" />
+                ))}
+                <path d="M -9 -5 L -3 -8 L 0 -4 L 3 -8 L 9 -5 L 3 -3 L 0 -5 L -3 -3 Z" fill="#3f6b35" />
+              </g>
+
+              <g transform="translate(290 216)">
+                <ellipse cx="0" cy="9" rx="11" ry="3" fill="rgba(0,0,0,0.4)" />
+                <path d="M -10 -2 Q -11 9 -5 15 Q 0 20 5 15 Q 11 9 10 -2 Q 5 -6 0 -6 Q -5 -6 -10 -2 Z" fill="url(#strawberry)" />
+                <path d="M -10 -2 Q -11 9 -5 15 Q 0 20 5 15 Q 11 9 10 -2 Q 5 -6 0 -6 Q -5 -6 -10 -2 Z" fill="url(#strawberryHi)" />
+                {[-4, 2, -2, 4].map((sx, i) => (
+                  <ellipse key={i} cx={sx} cy={3 + i * 3} rx="0.6" ry="1.1" fill="#ffe9b0" opacity="0.9" />
+                ))}
+                <path d="M -8 -5 L -2 -7 L 0 -4 L 2 -7 L 8 -5 Z" fill="#3f6b35" />
+              </g>
+
+              <g transform="translate(250 222)">
+                <ellipse cx="0" cy="8" rx="10" ry="2.8" fill="rgba(0,0,0,0.4)" />
+                <path d="M -9 -1 Q -10 9 -5 15 Q 0 18 5 15 Q 10 9 9 -1 Q 5 -5 0 -5 Q -5 -5 -9 -1 Z" fill="url(#strawberry)" />
+                <path d="M -9 -1 Q -10 9 -5 15 Q 0 18 5 15 Q 10 9 9 -1 Q 5 -5 0 -5 Q -5 -5 -9 -1 Z" fill="url(#strawberryHi)" />
+                <path d="M -7 -4 L -2 -7 L 0 -3 L 2 -7 L 7 -4 Z" fill="#3f6b35" />
+              </g>
+
+              {[
+                { x: 232, y: 224 },
+                { x: 268, y: 225 },
+                { x: 242, y: 215 },
+                { x: 258, y: 217 },
+                { x: 220, y: 232 },
+                { x: 280, y: 232 },
+              ].map((b, i) => (
+                <g key={`bb-${i}`} transform={`translate(${b.x} ${b.y})`}>
+                  <ellipse cx="0" cy="5" rx="4.5" ry="1.6" fill="rgba(0,0,0,0.4)" />
+                  <circle cx="0" cy="0" r="5" fill="url(#blueberry)" />
+                  <circle cx="0" cy="0" r="5" fill="url(#blueberryHi)" />
+                  <circle cx="0" cy="-2" r="1.2" fill="#1f2a4a" opacity="0.8" />
+                </g>
+              ))}
+
+              {[
+                [222, 218],
+                [278, 219],
+                [250, 210],
+              ].map(([x, y], i) => (
+                <g key={`extra-dot-${i}`}>
+                  <circle cx={x} cy={y} r="2.5" fill="#fffaf0" />
+                  <circle cx={x - 0.7} cy={y - 0.7} r="1.1" fill="#ffffff" />
+                </g>
+              ))}
+
+              {Array.from({ length: CANDLE_COUNT }).map((_, i) => {
+                const angle = ((i - (CANDLE_COUNT - 1) / 2) / CANDLE_COUNT) * Math.PI * 0.55;
+                const baseX = 250 + Math.sin(angle) * 78;
+                const baseY = 224 - Math.cos(angle) * 8 + Math.abs(angle) * 10;
+                const candleH = 46;
+                const lit = i < litCount;
+                return (
+                  <g key={`candle${i}`} transform={`translate(${baseX} ${baseY})`}>
+                    <rect x="-3.5" y={-candleH} width="7" height={candleH} rx="1.5" fill="url(#candleWax)" />
+                    <ellipse cx="0" cy={-candleH} rx="3.5" ry="1.4" fill="#fff5d8" />
+                    <ellipse cx="0" cy={-candleH - 0.5} rx="2.6" ry="1" fill="#fff" opacity="0.6" />
+                    <path
+                      d={`M -3.5 ${-candleH + 4} Q -4.2 ${-candleH + 9} -3 ${-candleH + 10} L -3.5 ${-candleH + 4} Z`}
+                      fill="#e8d2a8"
+                      opacity="0.7"
+                    />
+                    <rect x="-0.5" y={-candleH - 5} width="1" height="5" fill={lit ? '#ff8a2a' : '#2a160d'} />
+                    {lit && (
+                      <g className="flame">
+                        <circle className="flame-halo" cx="0" cy={-candleH - 9} r="14" fill="url(#flameHalo)" />
+                        <path
+                          d={`M 0 ${-candleH - 4} C -4.5 ${-candleH - 9}, -4 ${-candleH - 16}, 0 ${-candleH - 22} C 4 ${-candleH - 16}, 4.5 ${-candleH - 9}, 0 ${-candleH - 4} Z`}
+                          fill="url(#flameCore)"
+                        />
+                        <path
+                          d={`M 0 ${-candleH - 6} C -2 ${-candleH - 10}, -1.8 ${-candleH - 14}, 0 ${-candleH - 18} C 1.8 ${-candleH - 14}, 2 ${-candleH - 10}, 0 ${-candleH - 6} Z`}
+                          fill="#fff7d6"
+                          opacity="0.9"
+                        />
+                      </g>
+                    )}
+                    {lit && <ellipse cx="0" cy={-candleH + 2} rx="4" ry="2" fill="#ffcf6b" opacity="0.25" />}
+                  </g>
+                );
+              })}
+            </svg>
+          </div>
+        );
+      }
+
+      function SmokePuffs({ count }) {
+        if (count <= 0) return null;
+        return (
+          <div className="pointer-events-none absolute left-0 right-0" style={{ top: '8%', height: '30%' }} aria-hidden="true">
+            {Array.from({ length: count }).map((_, i) => {
+              const spread = 90;
+              const left = 50 + ((i - (count - 1) / 2) * spread) / Math.max(count, 1);
+              return (
+                <svg
+                  key={i}
+                  className="smoke absolute"
+                  style={{
+                    left: `${left}%`,
+                    bottom: 0,
+                    transform: 'translateX(-50%)',
+                    animationDelay: `${i * 90}ms`,
+                  }}
+                  width="20"
+                  height="40"
+                  viewBox="0 0 20 40"
+                >
+                  <ellipse cx="10" cy="34" rx="5" ry="6" fill="#cfc8bd" opacity="0.5" />
+                  <ellipse cx="9" cy="28" rx="4" ry="5" fill="#ded8cc" opacity="0.4" />
+                </svg>
+              );
+            })}
+          </div>
+        );
+      }
+
+      function App() {
+        const [candleState, setCandleState] = useState('unlit');
+        const [litCount, setLitCount] = useState(0);
+        const [smokeCount, setSmokeCount] = useState(0);
+        const timers = useRef([]);
+        const reduced = usePrefersReducedMotion();
+
+        useEffect(() => {
+          return () => timers.current.forEach((t) => clearTimeout(t));
+        }, []);
+
+        const clearTimers = () => {
+          timers.current.forEach((t) => clearTimeout(t));
+          timers.current = [];
+        };
+
+        const lightCandles = () => {
+          if (candleState === 'lit' || candleState === 'lighting') return;
+          clearTimers();
+          setCandleState('lighting');
+          setLitCount(0);
+          setSmokeCount(0);
+          const stepDelay = reduced ? 0 : 320;
+          for (let i = 1; i <= CANDLE_COUNT; i++) {
+            const t = window.setTimeout(() => {
+              setLitCount(i);
+              if (i === CANDLE_COUNT) setCandleState('lit');
+            }, i * stepDelay);
+            timers.current.push(t);
+          }
+        };
+
+        const blowOutCandles = () => {
+          if (candleState !== 'lit') return;
+          clearTimers();
+          setCandleState('blowing');
+          const stepDelay = reduced ? 0 : 240;
+          for (let i = CANDLE_COUNT - 1; i >= 0; i--) {
+            const t = window.setTimeout(() => {
+              setLitCount(i);
+              if (i === 0) {
+                setSmokeCount(CANDLE_COUNT);
+                setCandleState('out');
+                const resetTrans = window.setTimeout(() => {
+                  setSmokeCount(0);
+                  setCandleState('unlit');
+                }, reduced ? 0 : 2600);
+                timers.current.push(resetTrans);
+              }
+            }, (CANDLE_COUNT - i) * stepDelay);
+            timers.current.push(t);
+          }
+        };
+
+        const status =
+          candleState === 'lit' || candleState === 'lighting'
+            ? 'Make a wish... ✨'
+            : candleState === 'blowing' || candleState === 'out'
+            ? 'Your wish is on its way'
+            : 'Your candles are waiting...';
+
+        const canLight = candleState === 'unlit' || candleState === 'out';
+        const canBlow = candleState === 'lit';
+
+        const dimmed =
+          candleState === 'lighting' ||
+          candleState === 'lit' ||
+          candleState === 'blowing' ||
+          candleState === 'out';
+
+        return (
+          <main
+            className={`relative min-h-screen w-full flex flex-col items-center justify-between px-6 py-10 sm:py-14 overflow-hidden transition-colors duration-1000 ${
+              dimmed ? 'atmos-dim' : ''
+            }`}
+          >
+            <div className="bg-layer bg-light" aria-hidden="true" />
+            <div className="bg-layer bg-dark" aria-hidden="true" />
+            <Motes />
+
+            <header className="text-center z-10 rise-in">
+              <p className="txt-adapt-gold tracking-[0.42em] text-[0.6rem] sm:text-[0.7rem] mb-4 sm:mb-6">
+                A LITTLE SOMETHING FOR YOU
+              </p>
+              <h1 className="font-display text-2xl sm:text-4xl md:text-5xl font-medium leading-[1.2] txt-adapt">
+                <span className="whitespace-nowrap">Somewhere,</span>
+                <br />
+                <span className="italic txt-adapt-wish whitespace-nowrap">
+                  a little wish is waiting for you
+                </span>
+              </h1>
+            </header>
+
+            <section className="relative flex-1 flex items-center justify-center w-full max-w-3xl my-6 rise-in delay-2">
+              <div className="relative flex items-center justify-center">
+                <SmokePuffs count={smokeCount} />
+                <Cake litCount={litCount} />
+              </div>
+            </section>
+
+            <section className="z-10 flex flex-col items-center gap-5 rise-in delay-3 w-full max-w-md">
+              <p
+                className="font-display text-lg sm:text-xl txt-adapt-warm italic transition-opacity duration-500"
+                aria-live="polite"
+              >
+                {status}
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+                <button
+                  className="btn btn-primary"
+                  onClick={lightCandles}
+                  disabled={!canLight}
+                  aria-label="Light the candles"
+                >
+                  Light the candles
+                </button>
+                <button
+                  className="btn btn-ghost"
+                  onClick={blowOutCandles}
+                  disabled={!canBlow}
+                  aria-label="Blow out the candles"
+                >
+                  Blow out the candles
+                </button>
+              </div>
+            </section>
+
+            <footer className="z-10 rise-in delay-4 mt-8">
+              <p className="font-display text-sm sm:text-base tracking-[0.3em] txt-adapt-gold">
+                meomeo
+              </p>
+            </footer>
+          </main>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+    </script>
+  </body>
+</html>
